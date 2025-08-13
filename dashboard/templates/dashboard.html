@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Dashboard</h2>
+{% if table is none %}
+<p>No data yet. <a href="{{ url_for('upload') }}">Upload inventory</a>.</p>
+{% else %}
+<table>
+    <tr>
+        {% for col in table.columns %}<th>{{ col }}</th>{% endfor %}
+    </tr>
+    {% for row in table.itertuples() %}
+    <tr>
+        {% for col in table.columns %}<td>{{ getattr(row, col) }}</td>{% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+<canvas id="salesChart" width="400" height="200"></canvas>
+<script>
+    const ctx = document.getElementById('salesChart');
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ labels|tojson }},
+            datasets: [{
+                label: 'Daily Sales',
+                data: {{ sales|tojson }},
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }, {
+                label: 'Inventory',
+                data: {{ inventory|tojson }},
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: { scales: { y: { beginAtZero: true } } }
+    });
+</script>
+<p>
+    <a href="{{ url_for('export_excel') }}">Export Excel</a> |
+    <a href="{{ url_for('export_pdf') }}">Export PDF</a>
+</p>
+{% endif %}
+{% endblock %}
